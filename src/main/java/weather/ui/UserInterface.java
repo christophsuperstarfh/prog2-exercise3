@@ -3,16 +3,23 @@ package weather.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
-import tk.plogitech.darksky.forecast.ForecastException;
 import tk.plogitech.darksky.forecast.GeoCoordinates;
 import tk.plogitech.darksky.forecast.model.Latitude;
 import tk.plogitech.darksky.forecast.model.Longitude;
+import weather.ctrl.MyException;
 import weather.ctrl.WeatherController;
+import weather.download.ParallelDownloader;
+import weather.download.SequentialDownloader;
 
 public class UserInterface {
 
     private WeatherController ctrl = new WeatherController();
+    private SequentialDownloader sdl = new SequentialDownloader();
+    private ParallelDownloader pdl = new ParallelDownloader();
+
 
     public void getWeatherForCity1() {
 
@@ -29,6 +36,8 @@ public class UserInterface {
             System.out.println("No data was transferred, contact your Admin");
         } catch (Exception e) {
             System.out.println("An error occured, contact your Admin");
+        } catch (MyException e) {
+            e.printStackTrace();
         }
 
 
@@ -48,6 +57,8 @@ public class UserInterface {
             System.out.println("No data was transferred, contact your Admin");
         } catch (Exception e) {
             System.out.println("An error occured, contact your Admin");
+        } catch (MyException e) {
+            e.printStackTrace();
         }
 
     }
@@ -65,6 +76,8 @@ public class UserInterface {
             System.out.println("No data was transferred, contact your Admin");
         } catch (Exception e) {
             System.out.println("An error occured, contact your Admin");
+        } catch (MyException e) {
+            e.printStackTrace();
         }
 
     }
@@ -89,12 +102,40 @@ public class UserInterface {
 
         } catch (NumberFormatException ne) {
             System.out.println("Please enter valid coordinates");
+        } catch (Exception e) {
+            System.out.println("An error occured, contact your Admin");
+        } catch (MyException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+    public void downloadWeather() {
+
+        List<GeoCoordinates> coordinates = new ArrayList<>();
+
+        Longitude longitude = new Longitude(16.5333);
+        Latitude latitude = new Latitude(48.6667);
+        GeoCoordinates geoCoordinates = new GeoCoordinates(longitude, latitude);
+
+        coordinates.add(geoCoordinates);
+
+        longitude = new Longitude(16.5433);
+        latitude = new Latitude(48.6467);
+        geoCoordinates = new GeoCoordinates(longitude, latitude);
+
+        coordinates.add(geoCoordinates);
+
+        try {
+            sdl.process(coordinates);
+            pdl.process(coordinates);
+        } catch (NumberFormatException ne) {
+            System.out.println("Please enter valid coordinates");
         } catch (NullPointerException ne) {
             System.out.println("No data was transferred, contact your Admin");
         } catch (Exception e) {
             System.out.println("An error occured, contact your Admin");
         }
-
 
     }
 
@@ -105,6 +146,7 @@ public class UserInterface {
         menu.insert("b", "Wien", this::getWeatherForCity2);
         menu.insert("c", "Ameis", this::getWeatherForCity3);
         menu.insert("d", "City via Coordinates:", this::getWeatherByCoordinates);
+        menu.insert("e", "Download tickers", this::downloadWeather);
         menu.insert("q", "Quit", null);
         Runnable choice;
         while ((choice = menu.exec()) != null) {
